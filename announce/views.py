@@ -1,9 +1,7 @@
 from werkzeug import Response
 import hunnyb
 import db
-import struct
-import socket
-from base64 import binascii
+import utils
 
 # implementing the BitTorrent Tracker Protocol from http://wiki.theory.org/BitTorrent_Tracker_Protocol
 
@@ -47,7 +45,7 @@ def announce(request):
 	#if len(request.args.get('peer_id')) != 20:
 	#	return failure(151)
 		
-	info_hash = binascii.hexlify(request.args.get('info_hash'))
+	info_hash = request.args.get('info_hash')
 	peer_id = request.args.get('peer_id')
 	port = int(request.args.get('port'))
 	ip = request.args.get('ip', request.remote_addr)
@@ -57,18 +55,18 @@ def announce(request):
 	event = request.args.get('event')
 	
 	if event == 'stopped':
-		db.delete_peer(info_hash, peer_id)
+		db.delete_peer(info_hash, ip, port)
+		db.close()
 		return Response('OK', mimetype='text/plain')
 		
 	
 	db.register_peer(info_hash, peer_id, ip, port, uploaded, downloaded, left)
 
-	peers = [struct.pack('!4sH', socket.inet_aton(peer.get('ip')), peer.get('port')) for peer in db.get_peers(info_hash)]
-	interval = INTERVAL
-	
 	data = hunnyb.encode({
-		'interval': interval,
-		'peers': ''.join(peers),
+		'interval': INTERVAL,
+		'peers': db.get_peerlist(info_hash),
 	})
+	
+	db.close()
 	
 	return Response(data, mimetype='text/plain')

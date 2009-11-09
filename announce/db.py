@@ -1,32 +1,31 @@
 import redis
-import random
-import simplejson
+import utils
+from base64 import binascii
 
 KEEP_KEYS = 10 * 60 # seconds to keep clients in the database
 
 client = redis.Redis()
 
-def delete_peer(info_hash, peer_id):
-	for key in client.keys('%s:*:%s' % (hash(info_hash), hash(peer_id))):
-		client.delete(key)	
+def find_peers(info_hash=None, ip=None, port=None, left=None):
+	return client.keys('%s:%s:%s' % (
+		'*' if info_hash is None else hash(info_hash),
+		'*' if left is None else str(left),
+		'*' if (ip is None or port is None) else utils.compact(ip, port, ascii=True)
+	))
+
+def delete_peer(info_hash, ip, port):
+	for key in find_peers(info_hash=info_hash, ip=ip, port=port):
+		client.delete(key)
 
 def register_peer(info_hash, peer_id, ip, port, uploaded, downloaded, left):
-	peer = {
-		'info_hash': info_hash,
-		'peer_id': peer_id,
-		'ip': ip,
-		'port': port,
-		'uploaded': uploaded,
-		'downloaded': downloaded,
-		'left': left,
-	}
-	
-	key = '%s:%d:%s' % (hash(info_hash), left, hash(peer_id))
-	
-	delete_peer(info_hash, peer_id)
-	
-	client.set(key, simplejson.dumps(peer))
+	key = '%s:%d:%s' % (hash(info_hash), left, utils.compact(ip, port, ascii=True))
+	delete_peer(info_hash, ip, port)
+	client.set(key, 1)
 	client.expire(key, KEEP_KEYS)
 	
-def get_peers(info_hash, numwant=50, sorted=False, reverse=False):
-	return [simplejson.loads(peer) for peer in client.mget(*client.keys('%s:*' % hash(info_hash)))]
+def get_peerlist(info_hash, numwant=50):
+	return ''.join([binascii.unhexlify(peer.split(':')[2]) for peer in find_peers(info_hash=info_hash)])
+	
+def close():
+	return client.disconnect()
+	
