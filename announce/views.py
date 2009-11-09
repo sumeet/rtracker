@@ -2,6 +2,8 @@ from werkzeug import Response
 import hunnyb
 import db
 import struct
+import socket
+from base64 import binascii
 
 # implementing the BitTorrent Tracker Protocol from http://wiki.theory.org/BitTorrent_Tracker_Protocol
 
@@ -45,7 +47,7 @@ def announce(request):
 	#if len(request.args.get('peer_id')) != 20:
 	#	return failure(151)
 		
-	info_hash = request.args.get('info_hash')
+	info_hash = binascii.hexlify(request.args.get('info_hash'))
 	peer_id = request.args.get('peer_id')
 	port = int(request.args.get('port'))
 	ip = request.args.get('ip', request.remote_addr)
@@ -58,21 +60,15 @@ def announce(request):
 		db.delete_peer(info_hash, peer_id)
 		return Response('OK', mimetype='text/plain')
 		
+	
 	db.register_peer(info_hash, peer_id, ip, port, uploaded, downloaded, left)
 
-	#peers = [{'id': peer.get('peer_id'), 'ip': peer.get('ip'), 'port': peer.get('port'),} for peer in db.get_peers(info_hash)]
-	peers = []
-	for peer in db.get_peers(info_hash):
-		peers.append([hex(int(number)) for number in peer.get('ip').split('.')] + [hex(int(peer.get('port')))])
-		
-	print [hexed[0] + hexed[3] for hexed in peers]
-
-	print peers
+	peers = [struct.pack('!4sH', socket.inet_aton(peer.get('ip')), peer.get('port')) for peer in db.get_peers(info_hash)]
 	interval = INTERVAL
 	
 	data = hunnyb.encode({
 		'interval': interval,
-		'peers': ''.join([hexed[0] + hexed[3] for hexed in peers]),
+		'peers': ''.join(peers),
 	})
 	
 	return Response(data, mimetype='text/plain')
