@@ -42,8 +42,8 @@ class Torrent:
 		))
 
 	def delete_peer(self, ip, port):
-		for key in self.find_peers(ip=ip, port=port):
-			client.delete(key)
+		client.delete('%d:s:%s' % (hash(self.info_hash), utils.compact(ip, port, ascii=True)))
+		client.delete('%d:l:%s' % (hash(self.info_hash), utils.compact(ip, port, ascii=True)))
 
 	def register_peer(self, peer_id, ip, port, uploaded, downloaded, left):
 		key = '%d:%s:%s' % (
