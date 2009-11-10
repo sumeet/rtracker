@@ -40,11 +40,7 @@ def announce(request):
 		return failure(102)
 	if 'port' not in request.args:
 		return failure(103)
-	#if len(request.args.get('info_hash')) != 20:
-	#	return failure(150)
-	#if len(request.args.get('peer_id')) != 20:
-	#	return failure(151)
-		
+
 	info_hash = request.args.get('info_hash').encode('iso-8859-1')
 	peer_id = request.args.get('peer_id').encode('iso-8859-1')
 	port = request.args.get('port', type=int)
@@ -75,5 +71,32 @@ def announce(request):
 	}
 	
 	torrent.close()
+	
+	return utils.bResponse(data)
+	
+def scrape(request):
+	request.charset = 'latin-1'
+	
+	if request.method != 'GET':
+		return failure(100)
+		
+	if 'info_hash' in request.args:
+		info_hash = request.args.get('info_hash').encode('iso-8859-1')
+		
+		try:
+			torrents = [db.Torrent(info_hash)]
+		except db.TorrentUnregistered:
+			return failure(200)
+		
+	else:
+		torrents = db.Tracker().get_torrents()
+		
+	files = {}
+	
+	for torrent in torrents:
+		files.update(utils.scrapedict(torrent))
+		torrent.close()
+		
+	data = {'files': files ,}
 	
 	return utils.bResponse(data)

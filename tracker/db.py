@@ -37,7 +37,7 @@ class Torrent:
 	def find_peers(self, ip=None, port=None, status=None):
 		return client.keys('%d:%s:%s' % (
 			hash(self.info_hash),
-			'*' if status is None else status,
+			'*' if status is None else 's' if status.startswith('s') else 'l' if status.startswith('l') else '*',
 			'*' if (ip is None or port is None) else utils.compact(ip, port, ascii=True)
 		))
 
@@ -63,13 +63,16 @@ class Torrent:
 		
 	def completed(self):
 		return client.get(self._key())
+
+	def binary_hash(self):
+		return binascii.unhexlify(self.info_hash)
 	
 	@staticmethod
 	def close():
 		return client.disconnect()
 		
 	def _key(self):
-		return '!%s' % self.info_hash	
+		return '!%s' % self.info_hash
 		
 	def _exists(self):
 		return client.exists(self._key())
@@ -87,3 +90,10 @@ class Torrent:
 		result = client.delete(self._key())
 		client.save(background=True)
 		return result
+		
+class Tracker:
+	def __init__(self):
+		return
+		
+	def get_torrents(self):
+		return [Torrent(key.lstrip('!')) for key in client.keys('!*')]

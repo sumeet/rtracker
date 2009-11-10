@@ -17,3 +17,12 @@ def expand(compacted):
 class bResponse(Response):
 	def __init__(self, data):
 		super(bResponse, self).__init__(hunnyb.encode(data), mimetype='text/plain')
+		
+def scrapedict(torrent):
+	return {
+		torrent.binary_hash(): {
+			'complete': len(torrent.find_peers(status='seed')),
+			'downloaded': torrent.completed(),
+			'incomplete': len(torrent.find_peers(status='leech')),
+		},
+	}

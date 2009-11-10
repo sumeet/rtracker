@@ -8,9 +8,13 @@ root_path = os.path.abspath(os.path.dirname(__file__))
 
 url_map = Map([
 	Rule('/announce', endpoint='announce'),
+	Rule('/scrape', endpoint='scrape'),
 	])
 	
-views = {'announce': tracker.views.announce }
+views = {
+	'announce': tracker.views.announce,
+	'scrape': tracker.views.scrape,
+}
 
 @responder
 def application(environ, start_response):
