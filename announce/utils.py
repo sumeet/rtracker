@@ -15,5 +15,5 @@ def expand(compacted):
 	return (socket.inet_ntoa(ip), port)
 	
 class bResponse(Response):
-	def __init__(data):
+	def __init__(self, data):
 		super(bResponse, self).__init__(hunnyb.encode(data), mimetype='text/plain')
