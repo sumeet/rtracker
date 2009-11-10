@@ -2,7 +2,7 @@
 import os
 from werkzeug.routing import Map, Rule
 from werkzeug import Request, Response, responder
-import announce.views
+import tracker.views
 
 root_path = os.path.abspath(os.path.dirname(__file__))
 
@@ -10,7 +10,7 @@ url_map = Map([
 	Rule('/announce', endpoint='announce'),
 	])
 	
-views = {'announce': announce.views.announce }
+views = {'announce': tracker.views.announce }
 
 @responder
 def application(environ, start_response):
