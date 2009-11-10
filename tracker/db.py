@@ -2,7 +2,7 @@ import redis
 import utils
 from base64 import binascii
 
-KEEP_KEYS = 10 * 60 # seconds to keep clients in the database
+KEEP_KEYS = 10 * 60 # seconds to keep inactive peers in the store before expiring them
 
 client = redis.Redis()
 
@@ -18,7 +18,11 @@ def delete_peer(info_hash, ip, port):
 		client.delete(key)
 
 def register_peer(info_hash, peer_id, ip, port, uploaded, downloaded, left):
-	key = '%s:%d:%s' % (hash(info_hash), left, utils.compact(ip, port, ascii=True))
+	key = '%s:%s:%s' % (
+		hash(info_hash),
+		's' if left == 0 else 'l', 
+		utils.compact(ip, port, ascii=True)
+	)
 	delete_peer(info_hash, ip, port)
 	client.set(key, 1)
 	client.expire(key, KEEP_KEYS)
