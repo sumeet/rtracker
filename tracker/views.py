@@ -30,6 +30,8 @@ def failure(code=900):
 	return utils.bResponse(data)
 
 def announce(request):
+	request.charset = 'latin-1'
+	
 	if request.method != 'GET':
 		return failure(100)
 	if 'info_hash' not in request.args:
@@ -43,28 +45,35 @@ def announce(request):
 	#if len(request.args.get('peer_id')) != 20:
 	#	return failure(151)
 		
-	info_hash = request.args.get('info_hash')
-	peer_id = request.args.get('peer_id')
-	port = int(request.args.get('port'))
+	info_hash = request.args.get('info_hash').encode('iso-8859-1')
+	peer_id = request.args.get('peer_id').encode('iso-8859-1')
+	port = request.args.get('port', type=int)
 	ip = request.args.get('ip', request.remote_addr)
-	uploaded = int(request.args.get('uploaded'))
-	downloaded = int(request.args.get('downloaded'))
-	left = int(request.args.get('left'))
+	uploaded = request.args.get('uploaded', type=int)
+	downloaded = request.args.get('downloaded', type=int)
+	left = request.args.get('left', type=int)
 	event = request.args.get('event')
 	
+	try:
+		torrent = db.Torrent(info_hash)
+	except db.TorrentUnregistered:
+		return failure(200)
+
 	if event == 'stopped':
-		db.delete_peer(info_hash, ip, port)
-		db.close()
+		torrent.delete_peer(ip, port)
+		torrent.close()
 		return utils.bResponse('OK')
 		
-	
-	db.register_peer(info_hash, peer_id, ip, port, uploaded, downloaded, left)
+	if event == 'completed':
+		torrent.register_completed()
+		
+	torrent.register_peer(peer_id, ip, port, uploaded, downloaded, left)
 
 	data = {
 		'interval': INTERVAL,
-		'peers': db.get_peerlist(info_hash),
+		'peers': torrent.get_peerlist(info_hash),
 	}
 	
-	db.close()
+	torrent.close()
 	
 	return utils.bResponse(data)
