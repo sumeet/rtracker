@@ -1,5 +1,3 @@
-from werkzeug import Response
-import hunnyb
 import db
 import utils
 
@@ -24,12 +22,12 @@ def failure(code=900):
 	if code not in FAILURE_CODES:
 		code = 900
 			
-	data = hunnyb.encode({
+	data = {
 		'failure reason': FAILURE_CODES.get(code),
 		'failure code': code,
-	})
+	}
 	
-	return Response(data, mimetype='text/plain')
+	return utils.bResponse(data)
 
 def announce(request):
 	if request.method != 'GET':
@@ -57,16 +55,16 @@ def announce(request):
 	if event == 'stopped':
 		db.delete_peer(info_hash, ip, port)
 		db.close()
-		return Response('OK', mimetype='text/plain')
+		return utils.bResponse('OK')
 		
 	
 	db.register_peer(info_hash, peer_id, ip, port, uploaded, downloaded, left)
 
-	data = hunnyb.encode({
+	data = {
 		'interval': INTERVAL,
 		'peers': db.get_peerlist(info_hash),
-	})
+	}
 	
 	db.close()
 	
-	return Response(data, mimetype='text/plain')
+	return utils.bResponse(data)

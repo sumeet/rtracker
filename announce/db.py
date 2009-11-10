@@ -28,4 +28,3 @@ def get_peerlist(info_hash, numwant=50):
 	
 def close():
 	return client.disconnect()
-	
