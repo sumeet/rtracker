@@ -15,7 +15,7 @@ class Torrent(schema.Document):
 				torrent_file = data
 			elif hasattr(data, 'read'):
 				torrent_file = utils.TorrentFile(data.read(2 * 1024 * 1024))
-			kwargs.update(dict([(str(key),val) for key,val in utils.spaceless_dict(torrent_file.dictionary).iteritems()]))
+			kwargs.update(dict([(str(key).replace(' ', '_'),val) for key,val in torrent_file.dictionary.iteritems()]))
 			return super(Torrent, self).__init__(id=torrent_file.info_hash, **kwargs)
 		else:
 			return super(Torrent, self).__init__(**kwargs)
