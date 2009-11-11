@@ -88,7 +88,10 @@ class Torrent:
 		result = client.set(self._key(), 0, preserve=True)
 		if not result:
 			raise TorrentAlreadyExists(self.info_hash)
-		client.save(background=True)
+		try:
+			client.save(background=True)
+		except ResponseError:
+			client.save()
 		return result
 		
 class Tracker:
