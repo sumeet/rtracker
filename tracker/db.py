@@ -90,7 +90,7 @@ class Torrent:
 			raise TorrentAlreadyExists(self.info_hash)
 		try:
 			client.save(background=True)
-		except ResponseError:
+		except redis.ResponseError:
 			client.save()
 		return result
 		
