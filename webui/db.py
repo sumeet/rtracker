@@ -6,7 +6,7 @@ import datetime
 
 database = couchdb.client.Database('http://localhost:5984/rtracker')
 
-class Torrent(couchdb.schema.Document):
+class Torrent(schema.Document):
 	def __init__(self, data=None, **kwargs):
 		if data:
 			if isinstance(data, dict):
