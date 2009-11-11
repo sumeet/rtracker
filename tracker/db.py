@@ -67,6 +67,13 @@ class Torrent:
 	def binary_hash(self):
 		return binascii.unhexlify(self.info_hash)
 	
+	def delete(self):
+		for peer in self.find_peers():
+			client.delete(peer)
+		result = client.delete(self._key())
+		client.save(background=True)
+		return result
+
 	@staticmethod
 	def close():
 		return client.disconnect()
@@ -81,13 +88,6 @@ class Torrent:
 		result = client.set(self._key(), 0, preserve=True)
 		if not result:
 			raise TorrentAlreadyExists(self.info_hash)
-		client.save(background=True)
-		return result
-		
-	def _delete(self):
-		for peer in self.find_peers():
-			client.delete(peer)
-		result = client.delete(self._key())
 		client.save(background=True)
 		return result
 		

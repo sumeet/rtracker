@@ -16,7 +16,6 @@ class TorrentFile:
 			self.info_hash = self._info_hash()
 			
 		self.dictionary = self._torrent_dict(self.__dict__)
-		self.dictionary.update({'info_hash': self.info_hash})
 
 	def __getattr__(self, key):
 		return spaceless_dict(self.__dict__)[key]
