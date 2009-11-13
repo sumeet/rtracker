@@ -57,7 +57,6 @@ def announce(request):
 
 	if event == 'stopped':
 		torrent.delete_peer(ip, port)
-		torrent.close()
 		return utils.bResponse('OK')
 		
 	if event == 'completed':
@@ -69,8 +68,6 @@ def announce(request):
 		'interval': INTERVAL,
 		'peers': torrent.get_peerlist(info_hash),
 	}
-	
-	torrent.close()
 	
 	return utils.bResponse(data)
 	
@@ -95,7 +92,6 @@ def scrape(request):
 	
 	for torrent in torrents:
 		files.update(utils.scrapedict(torrent))
-		torrent.close()
 		
 	data = {'files': files ,}
 	

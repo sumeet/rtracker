@@ -28,6 +28,7 @@ class Torrent(schema.Document):
 	
 	pub_date = schema.DateTimeField(default=datetime.datetime.now())
 	uploaded_by = schema.TextField()
+	category = schema.TextField()
 		
 	type = schema.TextField(default='torrent')
 	
@@ -41,6 +42,9 @@ class Torrent(schema.Document):
 	def delete(self, db=database):
 		self.tracker().delete()
 		return db.delete(self.id)
+		
+	def get_file(self):
+		return utils.TorrentFile(dict(self.items())).torrent_file
 		
 	@classmethod
 	def by_pub_date(cls, db=database, descending=True):
