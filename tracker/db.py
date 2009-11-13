@@ -71,7 +71,7 @@ class Torrent:
 		for peer in self.find_peers():
 			client.delete(peer)
 		result = client.delete(self._key())
-		client.save(background=True)
+		client.save(background=False)
 		return result
 
 	def _key(self):
@@ -84,10 +84,7 @@ class Torrent:
 		result = client.set(self._key(), 0, preserve=True)
 		if not result:
 			raise TorrentAlreadyExists(self.info_hash)
-		try:
-			client.save(background=True)
-		except redis.ResponseError:
-			client.save()
+		client.save(background=False)
 		return result
 		
 class Tracker:
