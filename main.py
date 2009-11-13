@@ -3,17 +3,22 @@ import os
 from werkzeug.routing import Map, Rule
 from werkzeug import Request, Response, responder
 import tracker.views
+import webui.views
 
 root_path = os.path.abspath(os.path.dirname(__file__))
 
 url_map = Map([
 	Rule('/announce', endpoint='announce'),
 	Rule('/scrape', endpoint='scrape'),
+	Rule('/webui', endpoint='webui'),
+	Rule('/download', endpoint='download'),
 	])
 	
 views = {
 	'announce': tracker.views.announce,
 	'scrape': tracker.views.scrape,
+	'webui': webui.views.torrents,
+	'download': webui.views.torrent_file,
 }
 
 @responder

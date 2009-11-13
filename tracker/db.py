@@ -4,7 +4,7 @@ from base64 import binascii
 
 KEEP_KEYS = 10 * 60 # seconds to keep inactive peers in the store before expiring them
 
-client = redis.Redis()
+client = redis.Redis(timeout=300, connect_retry=3)
 
 class TorrentAlreadyExists(Exception):
 	def __init__(self, info_hash):
@@ -67,10 +67,13 @@ class Torrent:
 	def binary_hash(self):
 		return binascii.unhexlify(self.info_hash)
 	
-	@staticmethod
-	def close():
-		return client.disconnect()
-		
+	def delete(self):
+		for peer in self.find_peers():
+			client.delete(peer)
+		result = client.delete(self._key())
+		client.save(background=True)
+		return result
+
 	def _key(self):
 		return '!%s' % self.info_hash
 		
@@ -81,14 +84,10 @@ class Torrent:
 		result = client.set(self._key(), 0, preserve=True)
 		if not result:
 			raise TorrentAlreadyExists(self.info_hash)
-		client.save(background=True)
-		return result
-		
-	def _delete(self):
-		for peer in self.find_peers():
-			client.delete(peer)
-		result = client.delete(self._key())
-		client.save(background=True)
+		try:
+			client.save(background=True)
+		except redis.ResponseError:
+			client.save()
 		return result
 		
 class Tracker:
@@ -97,3 +96,4 @@ class Tracker:
 		
 	def get_torrents(self):
 		return [Torrent(key.lstrip('!')) for key in client.keys('!*')]
+				
