@@ -29,4 +29,4 @@ def application(environ, start_response):
 	
 if __name__ == '__main__':
 	from werkzeug import run_simple
-	run_simple('localhost', 4000, application)
+	run_simple('0.0.0.0', 4000, application)

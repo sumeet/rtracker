@@ -1,5 +1,6 @@
 import db
 import utils
+from common.utils import Memcache
 
 # implementing the BitTorrent Tracker Protocol from http://wiki.theory.org/BitTorrent_Tracker_Protocol
 
@@ -41,8 +42,12 @@ def announce(request):
 	if 'port' not in request.args:
 		return failure(103)
 
-	info_hash = request.args.get('info_hash').encode('iso-8859-1')
-	peer_id = request.args.get('peer_id').encode('iso-8859-1')
+	try:
+		info_hash = request.args.get('info_hash').encode('iso-8859-1')
+		peer_id = request.args.get('peer_id').encode('iso-8859-1')
+	except:
+		return failure(900)
+
 	port = request.args.get('port', type=int)
 	ip = request.args.get('ip', request.remote_addr)
 	uploaded = request.args.get('uploaded', type=int)
@@ -71,6 +76,7 @@ def announce(request):
 	
 	return utils.bResponse(data)
 	
+@Memcache(key='scrape', request_args=['info_hash'], ttl=60*5)
 def scrape(request):
 	request.charset = 'latin-1'
 	
@@ -78,7 +84,10 @@ def scrape(request):
 		return failure(100)
 		
 	if 'info_hash' in request.args:
-		info_hash = request.args.get('info_hash').encode('iso-8859-1')
+		try:
+			info_hash = request.args.get('info_hash').encode('iso-8859-1')
+		except:
+			return failure(900)
 		
 		try:
 			torrents = [db.Torrent(info_hash)]
