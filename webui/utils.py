@@ -34,7 +34,13 @@ class TorrentFile:
 		
 	@staticmethod
 	def _torrent_dict(data):
-		return dict([(key, value) for key,value in data.iteritems() if key in ['announce', 'created by', 'creation date', 'encoding', 'info']])
+		return dict(
+			[(key, value) for key,value in data.iteritems() if 
+				(key in ['announce', 'created by', 'creation date', 'encoding', 'info'])
+				and
+				(value is not None)
+			]
+		)
 		
 	def _dict_to_torrent(self, data):
 		dictionary = utf8_dict(self._torrent_dict(data))
