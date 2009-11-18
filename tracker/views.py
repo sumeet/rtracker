@@ -1,5 +1,7 @@
 import db
 import utils
+from common.utils import Memcache
+import urlparse
 
 # implementing the BitTorrent Tracker Protocol from http://wiki.theory.org/BitTorrent_Tracker_Protocol
 
@@ -30,19 +32,15 @@ def failure(code=900):
 	return utils.bResponse(data)
 
 def announce(request):
-	request.charset = 'latin-1'
-	
 	if request.method != 'GET':
 		return failure(100)
 	if 'info_hash' not in request.args:
 		return failure(101)
-	if 'peer_id' not in request.args:
-		return failure(102)
 	if 'port' not in request.args:
 		return failure(103)
 
-	info_hash = request.args.get('info_hash').encode('iso-8859-1')
-	peer_id = request.args.get('peer_id').encode('iso-8859-1')
+	info_hash = urlparse.parse_qs(request.query_string)['info_hash'][0]
+
 	port = request.args.get('port', type=int)
 	ip = request.args.get('ip', request.remote_addr)
 	uploaded = request.args.get('uploaded', type=int)
@@ -62,7 +60,7 @@ def announce(request):
 	if event == 'completed':
 		torrent.register_completed()
 		
-	torrent.register_peer(peer_id, ip, port, uploaded, downloaded, left)
+	torrent.register_peer(ip, port, uploaded, downloaded, left)
 
 	data = {
 		'interval': INTERVAL,
@@ -72,21 +70,19 @@ def announce(request):
 	return utils.bResponse(data)
 	
 def scrape(request):
-	request.charset = 'latin-1'
-	
 	if request.method != 'GET':
 		return failure(100)
 		
 	if 'info_hash' in request.args:
-		info_hash = request.args.get('info_hash').encode('iso-8859-1')
+		info_hashes = urlparse.parse_qs(request.query_string)['info_hash']
 		
 		try:
-			torrents = [db.Torrent(info_hash)]
+			torrents = [db.Torrent(info_hash) for info_hash in info_hashes]
 		except db.TorrentUnregistered:
 			return failure(200)
 		
 	else:
-		torrents = db.Tracker().get_torrents()
+		torrents = utils.get_torrents()
 		
 	files = {}
 	

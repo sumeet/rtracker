@@ -3,6 +3,7 @@ import socket
 import binascii
 import hunnyb
 from werkzeug import Response
+import db
 
 def compact(ip, port, ascii=False):
 	compacted = struct.pack('!4sH', socket.inet_aton(ip), port)
@@ -26,3 +27,6 @@ def scrapedict(torrent):
 			'incomplete': len(torrent.find_peers(status='leech')),
 		},
 	}
+	
+def get_torrents(self):
+	return [db.Torrent(key.lstrip('!')) for key in db.client.keys('!*')]

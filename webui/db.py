@@ -41,7 +41,7 @@ class Torrent(schema.Document):
 		
 	def delete(self, db=database):
 		self.tracker().delete()
-		return db.delete(self.id)
+		return db.delete(db.get(self.id))
 		
 	def get_file(self):
 		return utils.TorrentFile(dict(self.items())).torrent_file

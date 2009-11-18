@@ -1,8 +1,8 @@
 from werkzeug import Response
 import simplejson
-import memcache
+from werkzeug.contrib.cache import MemcachedCache
 
-mc = memcache.Client(['127.0.0.1:11211'])
+mc = MemcachedCache(['127.0.0.1:11211'], key_prefix='rtracker')
 
 class JSONResponse:
 	def __init__(self, func):

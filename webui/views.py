@@ -2,9 +2,10 @@ import db
 from common.utils import JSONResponse, Memcache
 import tracker.db
 from werkzeug import Response
+import hashlib
 
 @JSONResponse
-@Memcache('torrent_overview', ttl=60*10)
+@Memcache('torrent_overview', ttl=60*3)
 def torrents(request):
 	torrent_list = []
 	for torrent in db.database.view('torrent_info/by_pub_date', descending=True):
@@ -28,3 +29,42 @@ def torrent_file(request):
 	return Response(torrent.get_file(),
 		headers=[('Content-Disposition', 'attachment; filename=%s.torrent' % torrent.info.get('name'))],
 		mimetype='application/x-bittorrent')
+
+class LoginRequired:
+	def __init__(self, func):
+		self.func = func
+		
+	def __call__(self, request):
+		if request.method == 'POST':
+			username = request.form.get('username')
+			password = hashlib.md5(request.form.get('password')).hexdigest()
+			if len(db.database.view('users/by_username,password')[username, password]) == 1:
+				return self.func(request)
+			else:
+				return {'success': False}
+		
+		
+@JSONResponse
+@LoginRequired
+def login(request):
+	return {
+		'success': True,
+		'categories': [row.key for row in db.database.view('categories/names', group=True)]
+	}
+	
+@JSONResponse
+@LoginRequired
+def upload(request):
+	torrent = request.files.get('torrent')
+	category = request.form.get('category')
+	username = request.form.get('username')
+	
+	new_torrent = db.Torrent(torrent)
+	new_torrent.category = category
+	new_torrent.uploaded_by = username
+	
+	new_torrent.store()
+	
+	return {
+		'success': True
+	}

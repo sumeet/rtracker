@@ -10,8 +10,12 @@ root_path = os.path.abspath(os.path.dirname(__file__))
 url_map = Map([
 	Rule('/announce', endpoint='announce'),
 	Rule('/scrape', endpoint='scrape'),
-	Rule('/webui', endpoint='webui'),
-	Rule('/download', endpoint='download'),
+	Submount('/webui', [
+		Rule('/', endpoint='webui'),
+		Rule('/download', endpoint='download'),
+		Rule('/login', endpoint='login'),
+		Rule('/upload', endpoint='upload'),
+	],
 	])
 	
 views = {
@@ -19,6 +23,8 @@ views = {
 	'scrape': tracker.views.scrape,
 	'webui': webui.views.torrents,
 	'download': webui.views.torrent_file,
+	'login': webui.views.login,
+	'upload': webui.views.upload
 }
 
 @responder
@@ -29,4 +35,4 @@ def application(environ, start_response):
 	
 if __name__ == '__main__':
 	from werkzeug import run_simple
-	run_simple('localhost', 4000, application)
+	run_simple('0.0.0.0', 4000, application)

@@ -34,7 +34,13 @@ class TorrentFile:
 		
 	@staticmethod
 	def _torrent_dict(data):
-		return dict([(key, value) for key,value in data.iteritems() if key in ['announce', 'created by', 'creation date', 'encoding', 'info']])
+		return dict(
+			[(key, value) for key,value in data.iteritems() if 
+				(key in ['announce', 'created by', 'creation date', 'encoding', 'info'])
+				and
+				(value is not None)
+			]
+		)
 		
 	def _dict_to_torrent(self, data):
 		dictionary = utf8_dict(self._torrent_dict(data))
@@ -45,7 +51,7 @@ class TorrentFile:
 def utf8_dict(d):
 	"""Change Unicode objects to UTF-8 encoded strings because hunnyb likes them"""
 	if isinstance(d, dict):
-		return dict([(k.encode('utf-8'), utf8_dict(v)) for k,v in d.iteritems()])
+		return dict([(utf8_dict(k), utf8_dict(v)) for k,v in d.iteritems()])
 	elif isinstance(d, list):
 		return [utf8_dict(x) for x in d]
 	elif isinstance(d, unicode):
@@ -56,11 +62,14 @@ def utf8_dict(d):
 def unicode_dict(d):
 	"""Change strings to Unicode objects because CouchDB likes them"""
 	if isinstance(d, dict):
-		return dict([(k.decode('utf-8'), unicode_dict(v)) for k,v in d.iteritems()])
+		return dict([(unicode_dict(k), unicode_dict(v)) for k,v in d.iteritems()])
 	elif isinstance(d, list):
 		return [unicode_dict(x) for x in d]
 	elif isinstance(d, str):
-		return d.decode('utf-8')
+		try:
+			return d.decode('utf-8')
+		except UnicodeDecodeError:
+			return d.decode('iso-8859-1').encode('utf-8').decode('utf-8')
 	else:
 		return d
 
