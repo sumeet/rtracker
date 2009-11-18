@@ -15,8 +15,8 @@ url_map = Map([
 		Rule('/download', endpoint='download'),
 		Rule('/login', endpoint='login'),
 		Rule('/upload', endpoint='upload'),
-	],
-	])
+	]),
+])
 	
 views = {
 	'announce': tracker.views.announce,
