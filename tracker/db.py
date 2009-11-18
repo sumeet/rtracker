@@ -45,7 +45,7 @@ class Torrent:
 		client.delete('%d:s:%s' % (hash(self.info_hash), utils.compact(ip, port, ascii=True)))
 		client.delete('%d:l:%s' % (hash(self.info_hash), utils.compact(ip, port, ascii=True)))
 
-	def register_peer(self, peer_id, ip, port, uploaded, downloaded, left):
+	def register_peer(self, ip, port, uploaded, downloaded, left):
 		key = '%d:%s:%s' % (
 			hash(self.info_hash),
 			's' if left == 0 else 'l', 
@@ -86,11 +86,4 @@ class Torrent:
 			raise TorrentAlreadyExists(self.info_hash)
 		client.save(background=False)
 		return result
-		
-class Tracker:
-	def __init__(self):
-		return
-		
-	def get_torrents(self):
-		return [Torrent(key.lstrip('!')) for key in client.keys('!*')]
 				

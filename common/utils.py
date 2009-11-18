@@ -2,7 +2,7 @@ from werkzeug import Response
 import simplejson
 from werkzeug.contrib.cache import MemcachedCache
 
-mc = MemcachedCache(['127.0.0.1:11211'])
+mc = MemcachedCache(['127.0.0.1:11211'], key_prefix='rtracker')
 
 class JSONResponse:
 	def __init__(self, func):
@@ -16,17 +16,15 @@ class JSONResponse:
 		return Response(json, mimetype='application/javascript')
 		
 class Memcache:
-	def __init__(self, key, ttl=60*10, request_args=[]):
+	def __init__(self, key, ttl=60*10):
 		self.key = key
 		self.ttl = ttl
-		self.request_args = request_args
 		
 	def __call__(self, func):
 		def wrapped(*args, **kwargs):
-			key = str(hash(self.key + ':'.join([args[0].args.get(request_arg, '') for request_arg in self.request_args])))
-			data = mc.get(key)
+			data = mc.get(self.key)
 			if data is None:
 				data = func(*args, **kwargs)
-				mc.set(key, data, self.ttl)
+				mc.set(self.key, data, self.ttl)
 			return data
 		return wrapped
