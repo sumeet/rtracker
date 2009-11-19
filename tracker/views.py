@@ -2,6 +2,7 @@ import db
 import utils
 from common.utils import Memcache
 import urlparse
+import urllib
 
 # implementing the BitTorrent Tracker Protocol from http://wiki.theory.org/BitTorrent_Tracker_Protocol
 
@@ -40,6 +41,9 @@ def announce(request):
 		return failure(103)
 
 	info_hash = urlparse.parse_qs(request.query_string)['info_hash'][0]
+	
+	if len(info_hash) != 20:
+		info_hash = urllib.unquote(info_hash)
 
 	port = request.args.get('port', type=int)
 	ip = request.args.get('ip', request.remote_addr)
@@ -75,6 +79,10 @@ def scrape(request):
 		
 	if 'info_hash' in request.args:
 		info_hashes = urlparse.parse_qs(request.query_string)['info_hash']
+	
+		for (i, info_hash) in enumerate(info_hashes):
+			if len(info_hash) != 20:
+				info_hashes[i] = urllib.unquote(info_hash)
 		
 		try:
 			torrents = [db.Torrent(info_hash) for info_hash in info_hashes]
