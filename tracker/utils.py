@@ -28,5 +28,5 @@ def scrapedict(torrent):
 		},
 	}
 	
-def get_torrents(self):
+def get_torrents():
 	return [db.Torrent(key.lstrip('!')) for key in db.client.keys('!*')]
