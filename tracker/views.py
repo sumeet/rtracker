@@ -68,7 +68,7 @@ def announce(request):
 
 	data = {
 		'interval': INTERVAL,
-		'peers': torrent.get_peerlist(info_hash),
+		'peers': torrent.get_peerlist(),
 	}
 	
 	return utils.bResponse(data)
