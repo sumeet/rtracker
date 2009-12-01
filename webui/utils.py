@@ -60,7 +60,7 @@ def utf8_dict(d):
 		return d
 
 def unicode_dict(d):
-	"""Change strings to Unicode objects because CouchDB likes them"""
+	"""Change strings to Unicode objects because python-couchdb likes them"""
 	if isinstance(d, dict):
 		return dict([(unicode_dict(k), unicode_dict(v)) for k,v in d.iteritems()])
 	elif isinstance(d, list):

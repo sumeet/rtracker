@@ -70,7 +70,7 @@ def announce(request):
 		'interval': INTERVAL,
 		'peers': torrent.get_peerlist(),
 	}
-	
+
 	return utils.bResponse(data)
 	
 def scrape(request):
