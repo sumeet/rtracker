@@ -3,8 +3,14 @@ import couchdb.client
 import utils
 import tracker.db
 import datetime
+import threading
 
-database = couchdb.client.Database('http://localhost:5984/rtracker')
+class Couch(threading.local):
+	def __init__(self):
+		threading.local.__init__(self)
+		self.database = couchdb.client.Database('http://localhost:5984/rtracker')
+		
+database = Couch().database
 
 class Torrent(schema.Document):
 	def __init__(self, data=None, **kwargs):

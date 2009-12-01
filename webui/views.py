@@ -22,9 +22,7 @@ def torrents(request):
 			'leechers': len(track.find_peers(status='leech')),
 			'completed': track.completed(),
 		})
-	
-	tracker.db.disconnect()
-	
+		
 	return torrent_list
 	
 def torrent_file(request):

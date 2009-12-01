@@ -70,8 +70,6 @@ def announce(request):
 		'interval': INTERVAL,
 		'peers': torrent.get_peerlist(),
 	}
-	
-	db.client.disconnect()
 
 	return utils.bResponse(data)
 	
@@ -100,7 +98,5 @@ def scrape(request):
 		files.update(utils.scrapedict(torrent))
 		
 	data = {'files': files ,}
-
-	db.client.disconnect()
 	
 	return utils.bResponse(data)
