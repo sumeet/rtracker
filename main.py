@@ -31,7 +31,3 @@ def application(environ, start_response):
 	request = Request(environ)
 	urls = url_map.bind_to_environ(environ)
 	return urls.dispatch(lambda e, v: views[e](request, **v), catch_http_exceptions=True)
-	
-if __name__ == '__main__':
-	from werkzeug import run_simple
-	run_simple('0.0.0.0', 4000, application)
