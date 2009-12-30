@@ -1,7 +1,7 @@
 import struct
 import socket
 import binascii
-import hunnyb
+from bzrlib import bencode
 from werkzeug import Response
 import db
 
@@ -16,8 +16,11 @@ def expand(compacted):
 	return (socket.inet_ntoa(ip), port)
 	
 class bResponse(Response):
+	"""
+	Response object used to convert content value into a bencoded dictionary.
+	"""
 	def __init__(self, data):
-		super(bResponse, self).__init__(hunnyb.encode(data), mimetype='text/plain')
+		super(bResponse, self).__init__(bencode.bencode(data), mimetype='text/plain')
 		
 def scrapedict(torrent):
 	return {
@@ -29,4 +32,7 @@ def scrapedict(torrent):
 	}
 	
 def get_torrents():
+	"""
+	Returns a list of all torrent objects currently stored in the database.
+	"""
 	return [db.Torrent(key.lstrip('!')) for key in db.client.keys('!*')]

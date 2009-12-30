@@ -1,4 +1,4 @@
-import hunnyb
+from bzrlib import bencode
 import simplejson
 import binascii
 from hashlib import sha1
@@ -24,11 +24,11 @@ class TorrentFile:
 		return '<TorrentFile %s: %s>' % (repr(self.info.get('name')), repr(self.info_hash))
 		
 	def _info_hash(self):
-		return sha1(hunnyb.encode(hunnyb.decode(self.torrent_file).get('info'))).hexdigest()
+		return sha1(bencode.bencode(bencode.bdecode(self.torrent_file).get('info'))).hexdigest()
 		
 	@staticmethod
 	def _torrent_to_dict(data):
-		dictionary = hunnyb.decode(data)
+		dictionary = bencode.bdecode(data)
 		dictionary['info']['pieces'] = binascii.hexlify(dictionary['info']['pieces'])
 		return unicode_dict(dictionary)
 		
@@ -45,11 +45,11 @@ class TorrentFile:
 	def _dict_to_torrent(self, data):
 		dictionary = utf8_dict(self._torrent_dict(data))
 		dictionary['info']['pieces'] = binascii.unhexlify(dictionary['info']['pieces'])
-		return hunnyb.encode(dictionary)
+		return bencode.bencode(dictionary)
 		
 # inspired by http://mail.python.org/pipermail/python-list/2009-June/183752.html
 def utf8_dict(d):
-	"""Change Unicode objects to UTF-8 encoded strings because hunnyb likes them"""
+	"""Change Unicode objects to UTF-8 encoded strings"""
 	if isinstance(d, dict):
 		return dict([(utf8_dict(k), utf8_dict(v)) for k,v in d.iteritems()])
 	elif isinstance(d, list):

@@ -3,7 +3,7 @@ import db
 import views
 import utils
 from werkzeug import EnvironBuilder, Request, BaseResponse
-import hunnyb
+from bzrlib import bencode
 
 SAMPLE_HASH = '\x98H\x16\xfd2\x96"\x87n\x14\x90v4&No3.\x9f\xb3'
 SAMPLE_HASH_HEX = '984816fd329622876e14907634264e6f332e9fb3'
@@ -44,7 +44,7 @@ class TestViews(unittest.TestCase):
 		self.torrent.delete()
 		
 	def test_announce(self):
-		response_data = hunnyb.decode(views.announce(self._build_announce_request_object(ip='1.1.1.1', port='1234')).data)
+		response_data = bencode.bdecode(views.announce(self._build_announce_request_object(ip='1.1.1.1', port='1234')).data)
 		self.assert_(utils.compact('1.1.1.1', 1234) in response_data.get('peers'))
 		
 	def test_scrape(self):
@@ -54,7 +54,7 @@ class TestViews(unittest.TestCase):
 		# Scrape with info_hash specified
 		query_string = { 'info_hash': SAMPLE_HASH }
 		request = Request(EnvironBuilder(method='GET', query_string=query_string).get_environ())
-		response_data = hunnyb.decode(views.scrape(request).data)
+		response_data = bencode.bdecode(views.scrape(request).data)
 		self.assertEqual(response_data, {
 			'files': {
 				SAMPLE_HASH: {
@@ -67,7 +67,7 @@ class TestViews(unittest.TestCase):
 		
 		# Scrape with no info_hash specified
 		request = Request(EnvironBuilder(method='GET', query_string=None).get_environ())
-		response_data = hunnyb.decode(views.scrape(request).data)
+		response_data = bencode.bdecode(views.scrape(request).data)
 		self.assertEqual(response_data.get('files').get(SAMPLE_HASH), {
 				'complete': 1,
 				'downloaded': 1,
