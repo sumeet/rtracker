@@ -27,7 +27,7 @@ def torrents(request):
 	
 def torrent_file(request):
 	torrent = db.Torrent.get(info_hash=request.args.get('id'))
-	return redirect(Href('/webui/download')(torrent.info.get('name'), id=request.args.get('id')))
+	return redirect(Href('/webui/download')(torrent.info.get('name') + '.torrent', id=request.args.get('id')))
 
 class LoginRequired:
 	def __init__(self, func):
