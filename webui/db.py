@@ -44,6 +44,7 @@ class Torrent(schema.Document):
 	def store(self, db=database):
 		self.tracker(create=True)
 		super(Torrent, self).store(db)
+		db.put_attachment(db.get(self.id), self.get_file(), filename='torrent', content_type='application/x-bittorrent')
 		
 	def delete(self, db=database):
 		self.tracker().delete()
