@@ -1,7 +1,7 @@
 import db
 from common.utils import JSONResponse, Memcache
 import tracker.db
-from werkzeug import Response
+from werkzeug import Response, redirect
 import hashlib
 
 @JSONResponse
@@ -27,9 +27,7 @@ def torrents(request):
 	
 def torrent_file(request):
 	torrent = db.Torrent.get(info_hash=request.args.get('id'))
-	return Response(torrent.get_file(),
-		headers=[('Content-Disposition', 'attachment; filename=%s.torrent' % torrent.info.get('name'))],
-		mimetype='application/x-bittorrent')
+	return redirect('/webui/download/%s.torrent?id=%s' % (torrent.info.get('name'), request.args.get('id')))
 
 class LoginRequired:
 	def __init__(self, func):
