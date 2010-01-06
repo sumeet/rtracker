@@ -1,10 +1,17 @@
 import redis
 import utils
 from base64 import binascii
+import threading
 
 KEEP_KEYS = 10 * 60 # seconds to keep inactive peers in the store before expiring them
+INTERVAL = 180
 
-client = redis.Redis(timeout=300, retry_connection=True)
+class Redis(threading.local):
+	def __init__(self):
+		threading.local.__init__(self)
+		self.client = redis.Redis(timeout=300, retry_connection=True)
+		
+client = Redis().client
 
 class TorrentAlreadyExists(Exception):
 	def __init__(self, info_hash):
@@ -55,7 +62,7 @@ class Torrent:
 		client.set(key, 1)
 		client.expire(key, KEEP_KEYS)
 	
-	def get_peerlist(self, numwant=50):
+	def get_peerlist(self):
 		return ''.join([binascii.unhexlify(peer.split(':')[2]) for peer in self.find_peers()])
 		
 	def register_completed(self):
