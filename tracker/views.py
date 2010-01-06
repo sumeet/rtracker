@@ -1,6 +1,5 @@
 import db
 import utils
-from common.utils import Memcache
 import urlparse
 import urllib
 
@@ -19,7 +18,7 @@ FAILURE_CODES = {
 	900: 'Generic error',
 }
 
-INTERVAL = 15 # seconds
+INTERVAL = 180 # seconds
 
 def failure(code=900):
 	if code not in FAILURE_CODES:
