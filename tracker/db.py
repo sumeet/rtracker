@@ -1,4 +1,4 @@
-import pyredis
+import redis
 import utils
 from base64 import binascii
 import threading
@@ -6,12 +6,7 @@ import threading
 KEEP_KEYS = 10 * 60 # seconds to keep inactive peers in the store before expiring them
 INTERVAL = 180
 
-class Redis(threading.local):
-	def __init__(self):
-		threading.local.__init__(self)
-		self.client = pyredis.Redis(timeout=300)
-		
-client = Redis().client
+client = redis.Redis(timeout=300, retry_connection=True)
 
 class TorrentAlreadyExists(Exception):
 	def __init__(self, info_hash):

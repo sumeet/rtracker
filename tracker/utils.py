@@ -32,7 +32,7 @@ def scrapedict(torrent):
 		scrape = {
 			torrent.binary_hash(): {
 				'complete': len(torrent.find_peers(status='seed')),
-				'downloaded': int(torrent.completed()),
+				'downloaded': torrent.completed(),
 				'incomplete': len(torrent.find_peers(status='leech')),
 			},
 		}
