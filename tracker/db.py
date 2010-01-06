@@ -1,4 +1,4 @@
-import redis
+import pyredis
 import utils
 from base64 import binascii
 import threading
@@ -9,7 +9,7 @@ INTERVAL = 180
 class Redis(threading.local):
 	def __init__(self):
 		threading.local.__init__(self)
-		self.client = redis.Redis(timeout=300, retry_connection=True)
+		self.client = pyredis.Redis(timeout=300)
 		
 client = Redis().client
 
