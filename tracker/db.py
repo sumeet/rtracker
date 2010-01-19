@@ -2,6 +2,7 @@ import redis
 import utils
 from base64 import binascii
 import threading
+from common.utils import mc
 
 KEEP_KEYS = 10 * 60 # seconds to keep inactive peers in the store before expiring them
 INTERVAL = 180
@@ -58,7 +59,12 @@ class Torrent:
 		client.expire(key, KEEP_KEYS)
 	
 	def get_peerlist(self):
-		return ''.join([binascii.unhexlify(peer.split(':')[2]) for peer in self.find_peers()])
+		key = 'get_peerlist_%s' % self.info_hash
+		peerlist = mc.get(key)
+		if peerlist is None:
+			peerlist = ''.join([binascii.unhexlify(peer.split(':')[2]) for peer in self.find_peers()])
+			mc.set(key, peerlist, INTERVAL)
+		return peerlist
 		
 	def register_completed(self):
 		return client.incr(self._key())
@@ -88,4 +94,3 @@ class Torrent:
 			raise TorrentAlreadyExists(self.info_hash)
 		client.save(background=False)
 		return result
-				

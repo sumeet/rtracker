@@ -1,5 +1,5 @@
 import db
-from common.utils import JSONResponse, Memcache
+from common.utils import JSONResponse, Memcache, mc
 import tracker.db
 from werkzeug import Response, redirect, Href
 import hashlib
@@ -22,11 +22,15 @@ def torrents(request):
 			'leechers': len(track.find_peers(status='leech')),
 			'completed': track.completed(),
 		})
-		
 	return torrent_list
 	
 def torrent_file(request):
-	name = list(db.database.view('torrent_name/by_info_hash')[request.args.get('id')])[0].value
+	key = 'torrent_name_%s' % request.args.get('id')
+	interval = 2400
+	name = mc.get(key)
+	if name is None:
+		name = list(db.database.view('torrent_name/by_info_hash')[request.args.get('id')])[0].value
+		mc.set(key, name, interval)
 	return redirect(Href('/webui/download')(name + '.torrent', id=request.args.get('id')))
 
 class LoginRequired:
