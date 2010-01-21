@@ -74,6 +74,36 @@ class TestViews(unittest.TestCase):
 				'incomplete': 1,
 		})
 		
+	def test_failure(self):
+		# Announce with no info_hash specified
+		request = Request(EnvironBuilder(method='GET', query_string=None).get_environ())
+		response_data = bencode.bdecode(views.announce(request).data)
+		failure = {
+			'failure reason': 'Missing info_hash',
+			'failure code': 101,
+		}
+		self.assertEqual(response_data, failure)
+		
+	def test_bad_info_hash(self):
+		# Announce with a bad info_hash
+		request = self._build_announce_request_object(info_hash='\x98H\x16\xfd2\x96"\x87n\x14\x90v4&No3.\x9f\xb2')
+		response_data = bencode.bdecode(views.announce(request).data)
+		failure = {
+			'failure reason': 'info_hash not found in the database',
+			'failure code': 200,
+		}
+		self.assertEqual(response_data, failure)
+		
+	def test_post_announce(self):
+		# Try HTTP POST to announce instead of GET
+		request = Request(EnvironBuilder(method='POST', query_string=None).get_environ())
+		response_data = bencode.bdecode(views.announce(request).data)
+		failure = {
+			'failure reason': 'Invalid request type: client request was not a HTTP GET',
+			'failure code': 100
+		}
+		self.assertEqual(response_data, failure)
+		
 def run_tests():
 	for case in [TestTorrentDB, TestViews]:
 		suite = unittest.TestLoader().loadTestsFromTestCase(case)

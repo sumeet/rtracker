@@ -23,6 +23,15 @@ class TorrentUnregistered(Exception):
 		
 class Torrent:
 	def __init__(self, info_hash, create=False):
+		"""
+		Loads a torrent object (use argument create=True for a new torrent).
+		
+		Try loading a bad torrent:
+		>>> torrent = Torrent('bad_hash')
+		Traceback (most recent call last):
+			...
+		TorrentUnregistered: 'bad_hash'
+		"""
 		if len(info_hash) == 40:
 			self.info_hash = info_hash
 		elif len(info_hash) == 20:
