@@ -7,13 +7,15 @@ url_map = Map([
 	Rule('/download', endpoint='download'),
 	Rule('/login', endpoint='login'),
 	Rule('/upload', endpoint='upload'),
+	Rule('/torrent_info', endpoint='torrent_info'),
 ])
 	
 views = {
 	'webui': views.torrents,
 	'download': views.torrent_file,
 	'login': views.login,
-	'upload': views.upload
+	'upload': views.upload,
+	'torrent_info': views.torrent_info,
 }
 
 @responder

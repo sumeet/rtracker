@@ -9,11 +9,11 @@ class JSONResponse:
 		self.func = func
 		
 	def __call__(self, request):
-		json = simplejson.dumps(self.func(request))
+		json = simplejson.dumps(self.func(request), ensure_ascii=True)
 		callback = request.args.get('callback')
 		if callback:
 			json = '%s(%s);' % (callback, json)
-		return Response(json, mimetype='application/javascript')
+		return Response(json, content_type='application/javascript; charset=utf-8')
 		
 class Memcache:
 	def __init__(self, key, ttl=60*10):

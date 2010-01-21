@@ -33,6 +33,17 @@ def torrent_file(request):
 		mc.set(key, name, interval)
 	return redirect(Href('/webui/download')(name + '.torrent', id=request.args.get('id')))
 
+@JSONResponse
+def torrent_info(request):
+	info_hash = request.args.get('id')
+	key = 'torrent_info_%s' % info_hash
+	interval = 2400
+	information = mc.get(key)
+	if information is None:
+		information = list(db.database.view('torrent_info_detailed/by_info_hash')[info_hash])[0].value
+		mc.set(key, information, interval)
+	return information
+
 class LoginRequired:
 	def __init__(self, func):
 		self.func = func
