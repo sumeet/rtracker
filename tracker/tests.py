@@ -85,7 +85,9 @@ class TestViews(unittest.TestCase):
 		self.assertEqual(response_data, failure)
 		
 	def test_bad_info_hash(self):
-		# Announce with a bad info_hash
+		"""
+		Announcing with an info_hash that's not registed should give a failure
+		"""
 		request = self._build_announce_request_object(info_hash='\x98H\x16\xfd2\x96"\x87n\x14\x90v4&No3.\x9f\xb2')
 		response_data = bencode.bdecode(views.announce(request).data)
 		failure = {
