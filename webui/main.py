@@ -18,8 +18,11 @@ views = {
 	'torrent_info': views.torrent_info,
 }
 
+class LargeFileRequest(Request):
+	max_content_length = 20 * 1024 * 1024
+
 @responder
 def application(environ, start_response):
-	request = Request(environ)
+	request = LargeFileRequest(environ)
 	urls = url_map.bind_to_environ(environ)
 	return urls.dispatch(lambda e, v: views[e](request, **v), catch_http_exceptions=True)

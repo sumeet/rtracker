@@ -2,6 +2,7 @@ from bzrlib import bencode
 import simplejson
 import binascii
 from hashlib import sha1
+from werkzeug import BaseRequest
 
 class TorrentFile:
 	def __init__(self, data):
