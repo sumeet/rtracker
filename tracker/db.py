@@ -2,7 +2,7 @@ import redis
 import utils
 from base64 import binascii
 import threading
-from common.utils import mc
+from rtracker.common.utils import mc
 
 KEEP_KEYS = 10 * 60 # seconds to keep inactive peers in the store before expiring them
 INTERVAL = 180

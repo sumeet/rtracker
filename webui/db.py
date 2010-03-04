@@ -1,7 +1,7 @@
 from couchdb import schema
 import couchdb.client
 import utils
-import tracker.db
+import rtracker.tracker.db
 import datetime
 import threading
 

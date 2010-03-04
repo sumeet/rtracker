@@ -1,0 +1,1 @@
+from tracker.main import application
