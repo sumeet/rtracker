@@ -21,7 +21,8 @@ def action_syncviews():
 	from couchdb.design import ViewDefinition
 	import webui.db
 	try:
-		ViewDefinition.sync_many(webui.db.database, couchdb_views.view_definitions)
+		ViewDefinition.sync_many(webui.db.database,
+			couchdb_views.view_definitions)
 	except AttributeError:
 		print 'Error: CouchDB must not be running'
 		sys.exit(1)

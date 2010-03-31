@@ -1,6 +1,6 @@
 import db
-from common.utils import JSONResponse, Memcache, mc
-import tracker.db
+from rtracker.common.utils import JSONResponse, Memcache, mc
+import rtracker.tracker.db
 from werkzeug import Response, redirect, Href
 import hashlib
 

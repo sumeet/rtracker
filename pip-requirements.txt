@@ -1,0 +1,6 @@
+Werkzeug
+redis
+simplejson
+couchdb
+python-memcached
+bzr
