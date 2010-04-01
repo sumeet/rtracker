@@ -79,6 +79,18 @@ def upload(request):
 	
 	new_torrent.store()
 	
+	mc.delete('torrent_overview')
+	
 	return {
 		'success': True
 	}
+
+@JSONResponse
+@LoginRequired
+def delete(request):
+    torrent = request.files.get('torrent')
+    db.Torrent(torrent).delete()
+    mc.delete('torrent_overview')
+    return {
+        'success': True
+    }

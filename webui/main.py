@@ -8,6 +8,7 @@ url_map = Map([
 	Rule('/login', endpoint='login'),
 	Rule('/upload', endpoint='upload'),
 	Rule('/torrent_info', endpoint='torrent_info'),
+	Rule('/delete', endpoint='delete'),
 ])
 	
 views = {
@@ -16,6 +17,7 @@ views = {
 	'login': views.login,
 	'upload': views.upload,
 	'torrent_info': views.torrent_info,
+	'delete': views.delete,
 }
 
 class LargeFileRequest(Request):

@@ -1,7 +1,7 @@
 from couchdb import schema
 import couchdb.client
 import utils
-import rtracker.tracker.db
+from rtracker.tracker import db as tracker_db
 import datetime
 import threading
 
@@ -39,7 +39,7 @@ class Torrent(schema.Document):
 	type = schema.TextField(default='torrent')
 	
 	def tracker(self, **kwargs):
-		return tracker.db.Torrent(self.id, **kwargs)
+		return tracker_db.Torrent(self.id, **kwargs)
 		
 	def store(self, db=database):
 		self.tracker(create=True)
