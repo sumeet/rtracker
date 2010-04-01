@@ -82,3 +82,13 @@ def upload(request):
 	return {
 		'success': True
 	}
+
+@JSONResponse
+@LoginRequired
+def delete(request):
+    torrent = request.files.get('torrent')
+    db.Torrent(torrent).delete()
+    
+    return {
+        'success': True
+    }
