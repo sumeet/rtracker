@@ -3,4 +3,7 @@ redis
 simplejson
 couchdb
 python-memcached
+Pyrex
 bzr
+coverage
+nose

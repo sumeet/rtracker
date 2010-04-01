@@ -11,7 +11,11 @@ SAMPLE_HASH_HEX = '984816fd329622876e14907634264e6f332e9fb3'
 # Test basic functionality. Add a torrent by info_hash, get announce and scrape, then delete the torrent
 class TestTorrentDB(unittest.TestCase):
 	def setUp(self):
-		self.torrent = db.Torrent(SAMPLE_HASH, create=True)
+		try:
+			self.torrent = db.Torrent(SAMPLE_HASH, create=True)
+		except db.TorrentAlreadyExists:
+			db.Torrent(SAMPLE_HASH).delete()
+			self.torrent = db.Torrent(SAMPLE_HASH, create=True)
 	
 	def tearDown(self):
 		self.torrent.delete()
