@@ -1,6 +1,11 @@
 import db
 import utils
 import urlparse
+
+# Backwards compatibility for Python 2.5
+if not hasattr(urlparse, 'parse_qs'):
+	import cgi as urlparse
+
 import urllib
 
 # implementing the BitTorrent Tracker Protocol from http://wiki.theory.org/BitTorrent_Tracker_Protocol

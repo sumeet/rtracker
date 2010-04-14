@@ -42,7 +42,7 @@ class bResponse(Response):
 		super(bResponse, self).__init__(bencode.bencode(data), mimetype='text/plain')
 		
 def scrapedict(torrent):
-	key = 'scrapedict_%s' % torrent
+	key = 'scrapedict_%s' % torrent.info_hash
 	scrape = mc.get(key)
 	if scrape is None:
 		scrape = {
