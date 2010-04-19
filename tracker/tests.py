@@ -109,8 +109,3 @@ class TestViews(unittest.TestCase):
 			'failure code': 100
 		}
 		self.assertEqual(response_data, failure)
-		
-def run_tests():
-	for case in [TestTorrentDB, TestViews]:
-		suite = unittest.TestLoader().loadTestsFromTestCase(case)
-		unittest.TextTestRunner(verbosity=2).run(suite)
