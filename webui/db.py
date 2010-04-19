@@ -1,4 +1,7 @@
-from couchdb import schema
+try:
+	from couchdb import schema
+except ImportError:
+	from couchdb import mapping as schema # `schema` is called `mapping` in couchdb-python 0.7+
 import couchdb.client
 import utils
 from rtracker.tracker import db as tracker_db
