@@ -1,2 +1,2 @@
 #!/bin/bash
-nosetests -v --with-coverage --cover-package=rtracker.tracker --with-doctest
+nosetests -v --with-coverage --cover-package=rtracker --with-doctest

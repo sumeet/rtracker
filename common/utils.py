@@ -41,6 +41,9 @@ class Memcache:
 	2
 	>>> test(2)
 	2
+	>>> import time ; time.sleep(1)
+	>>> test(100)
+	101
 	"""
 	def __init__(self, key, ttl=60*10):
 		self.key = key
