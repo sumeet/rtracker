@@ -25,13 +25,10 @@ def torrents(request):
 	return torrent_list
 	
 def torrent_file(request):
-	key = 'torrent_name_%s' % request.args.get('id')
-	interval = 2400
-	name = mc.get(key)
-	if name is None:
-		name = list(db.database.view('torrent_name/by_info_hash')[request.args.get('id')])[0].value
-		mc.set(key, name, interval)
-	return redirect(Href('/webui/download')(name + '.torrent', id=request.args.get('id')))
+	torrent = db.Torrent.get(info_hash=request.args.get('id'))
+	return Response(torrent.get_file(),
+		headers=[('Content-Disposition', 'attachment; filename=%s.torrent' % torrent.info.get('name'))],
+		mimetype='application/x-bittorrent')
 
 @JSONResponse
 def torrent_info(request):
