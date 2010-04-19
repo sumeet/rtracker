@@ -1,13 +1,12 @@
 import redis
 import utils
 from base64 import binascii
-import threading
 from rtracker.common.utils import mc
 
 KEEP_KEYS = 10 * 60 # seconds to keep inactive peers in the store before expiring them
 INTERVAL = 180
 
-client = redis.Redis(timeout=300, retry_connection=True)
+client = redis.Redis()
 
 class TorrentAlreadyExists(Exception):
 	def __init__(self, info_hash):
@@ -79,7 +78,7 @@ class Torrent:
 		return client.incr(self._key())
 		
 	def completed(self):
-		return client.get(self._key())
+		return int(client.get(self._key()))
 
 	def binary_hash(self):
 		return binascii.unhexlify(self.info_hash)
@@ -88,7 +87,7 @@ class Torrent:
 		for peer in self.find_peers():
 			client.delete(peer)
 		result = client.delete(self._key())
-		client.save(background=False)
+		client.save()
 		return result
 
 	def _key(self):
@@ -98,8 +97,8 @@ class Torrent:
 		return client.exists(self._key())
 		
 	def _create(self):
-		result = client.set(self._key(), 0, preserve=True)
+		result = client.setnx(self._key(), 0)
 		if not result:
 			raise TorrentAlreadyExists(self.info_hash)
-		client.save(background=False)
+		client.save()
 		return result
