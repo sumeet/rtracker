@@ -8,7 +8,8 @@ if not hasattr(urlparse, 'parse_qs'):
 
 import urllib
 
-# implementing the BitTorrent Tracker Protocol from http://wiki.theory.org/BitTorrent_Tracker_Protocol
+# Implementing the BitTorrent Tracker Protocol from
+# http://wiki.theory.org/BitTorrent_Tracker_Protocol
 
 FAILURE_CODES = {
 	100: 'Invalid request type: client request was not a HTTP GET',
@@ -17,7 +18,8 @@ FAILURE_CODES = {
 	103: 'Missing port',
 	150: 'Invalid infohash: infohash is not 20 bytes long',
 	151: 'Invalid peerid: peerid is not 20 bytes long',
-	152: 'Invalid numwant. Client requested more peers than allowed by tracker',
+	152:
+		'Invalid numwant. Client requested more peers than allowed by tracker',
 	200: 'info_hash not found in the database',
 	500: 'Client sent an eventless request before the specified time',
 	900: 'Generic error',

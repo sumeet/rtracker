@@ -1,7 +1,7 @@
 try:
 	from couchdb import schema
 except ImportError:
-	from couchdb import mapping as schema # `schema` is called `mapping` in couchdb-python 0.7+
+	from couchdb import mapping as schema # For couchdb-python 0.7+
 import couchdb.client
 import utils
 from rtracker.tracker import db as tracker_db
@@ -11,7 +11,9 @@ import threading
 class Couch(threading.local):
 	def __init__(self):
 		threading.local.__init__(self)
-		self.database = couchdb.client.Database('http://localhost:5984/rtracker')
+		self.database = couchdb.client.Database(
+			'http://localhost:5984/rtracker'
+		)
 		
 database = Couch().database
 
@@ -24,8 +26,11 @@ class Torrent(schema.Document):
 				torrent_file = data
 			elif hasattr(data, 'read'):
 				torrent_file = utils.TorrentFile(data.read(2 * 1024 * 1024))
-			kwargs.update(dict([(str(key).replace(' ', '_'),val) for key,val in torrent_file.dictionary.iteritems()]))
-			return super(Torrent, self).__init__(id=torrent_file.info_hash, **kwargs)
+			kwargs.update(dict([(str(key).replace(' ', '_'),val)
+				for key,val in torrent_file.dictionary.iteritems()]))
+			return super(Torrent, self).__init__(
+				id=torrent_file.info_hash, **kwargs
+			)
 		else:
 			return super(Torrent, self).__init__(**kwargs)
 	
@@ -47,7 +52,12 @@ class Torrent(schema.Document):
 	def store(self, db=database):
 		self.tracker(create=True)
 		super(Torrent, self).store(db)
-		db.put_attachment(db.get(self.id), self.get_file(), filename='torrent', content_type='application/x-bittorrent')
+		db.put_attachment(
+			db.get(self.id),
+			self.get_file(),
+			filename='torrent',
+			content_type='application/x-bittorrent'
+		)
 		
 	def delete(self, db=database):
 		self.tracker().delete()
@@ -58,12 +68,20 @@ class Torrent(schema.Document):
 		
 	@classmethod
 	def by_pub_date(cls, db=database, descending=True):
-		return list(cls.view(db, 'torrents/by_pub_date', descending=descending, include_docs=True))
+		return list(cls.view(
+			db,
+			'torrents/by_pub_date',
+			descending=descending,
+			include_docs=True)
+		)
 		
 	@classmethod
 	def get(cls, db=database, info_hash=None, name=None):
 		if info_hash:
 			return cls.load(db, info_hash)
 		elif name:
-			return list(cls.view(db, 'torrents/by_name', include_docs=True)[name])[0]
-		
+			return list(cls.view(
+				db,
+				'torrents/by_name',
+				include_docs=True
+			)[name])[0]

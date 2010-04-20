@@ -22,22 +22,30 @@ class TorrentFile:
 		return spaceless_dict(self.__dict__)[key]
 		
 	def __repr__(self):
-		return '<TorrentFile %s: %s>' % (repr(self.info.get('name')), repr(self.info_hash))
+		return '<TorrentFile %s: %s>' % (
+			repr(self.info.get('name')),
+			repr(self.info_hash)
+		)
 		
 	def _info_hash(self):
-		return sha1(bencode.bencode(bencode.bdecode(self.torrent_file).get('info'))).hexdigest()
+		return sha1(bencode.bencode(
+			bencode.bdecode(self.torrent_file).get('info')
+		)).hexdigest()
 		
 	@staticmethod
 	def _torrent_to_dict(data):
 		dictionary = bencode.bdecode(data)
-		dictionary['info']['pieces'] = binascii.hexlify(dictionary['info']['pieces'])
+		dictionary['info']['pieces'] = binascii.hexlify(
+			dictionary['info']['pieces']
+		)
 		return unicode_dict(dictionary)
 		
 	@staticmethod
 	def _torrent_dict(data):
 		return dict(
 			[(key, value) for key,value in data.iteritems() if 
-				(key in ['announce', 'created by', 'creation date', 'encoding', 'info'])
+				(key in ['announce', 'created by', 'creation date',
+					'encoding', 'info'])
 				and
 				(value is not None)
 			]
@@ -45,12 +53,17 @@ class TorrentFile:
 		
 	def _dict_to_torrent(self, data):
 		dictionary = utf8_dict(self._torrent_dict(data))
-		dictionary['info']['pieces'] = binascii.unhexlify(dictionary['info']['pieces'])
+		dictionary['info']['pieces'] = binascii.unhexlify(
+			dictionary['info']['pieces']
+		)
 		return bencode.bencode(dictionary)
 		
-# inspired by http://mail.python.org/pipermail/python-list/2009-June/183752.html
+# http://mail.python.org/pipermail/python-list/2009-June/183752.html
 def utf8_dict(d):
-	"""Change Unicode objects to UTF-8 encoded strings"""
+	"""
+	Change Unicode objects to UTF-8 encoded strings
+	"""
+	
 	if isinstance(d, dict):
 		return dict([(utf8_dict(k), utf8_dict(v)) for k,v in d.iteritems()])
 	elif isinstance(d, list):
@@ -61,9 +74,14 @@ def utf8_dict(d):
 		return d
 
 def unicode_dict(d):
-	"""Change strings to Unicode objects because python-couchdb likes them"""
+	"""
+	Change strings to Unicode objects because python-couchdb likes them
+	"""
+	
 	if isinstance(d, dict):
-		return dict([(unicode_dict(k), unicode_dict(v)) for k,v in d.iteritems()])
+		return dict(
+			[(unicode_dict(k), unicode_dict(v)) for k,v in d.iteritems()]
+		)
 	elif isinstance(d, list):
 		return [unicode_dict(x) for x in d]
 	elif isinstance(d, str):
@@ -75,9 +93,15 @@ def unicode_dict(d):
 		return d
 
 def spaceless_dict(d):
-	"""Change spaces in dictionary keys to underscores because Python likes them"""
+	"""
+	Change spaces in dictionary keys to underscores because Python likes them
+	"""
+	
 	if isinstance(d, dict):
-		return dict([(k.replace(' ', '_'), spaceless_dict(v)) for k,v in d.iteritems()])
+		return dict(
+			[(k.replace(' ', '_'), spaceless_dict(v))
+				for k,v in d.iteritems()]
+		)
 	elif isinstance(d, list):
 		return [spaceless_dict(x) for x in d]
 	else:

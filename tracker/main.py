@@ -19,4 +19,7 @@ views = {
 def application(environ, start_response):
 	request = Request(environ)
 	urls = url_map.bind_to_environ(environ)
-	return urls.dispatch(lambda e, v: views[e](request, **v), catch_http_exceptions=True)
+	return urls.dispatch(
+		lambda e, v: views[e](request, **v),
+		catch_http_exceptions=True
+	)

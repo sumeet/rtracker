@@ -32,7 +32,8 @@ view_definitions = [
 					var num_files = 1;
 				}
 				var val = {
-					"size": (doc.info.pieces.length / 40) * doc.info['piece length'],
+					"size": (doc.info.pieces.length / 40) *
+						doc.info['piece length'],
 					"name": doc.info.name,
 					"num_files": num_files,
 					"uploaded_by": doc.uploaded_by,
@@ -61,7 +62,8 @@ view_definitions = [
 					var files = [doc.info.name];
 				}
 				var val = {
-					"size": (doc.info.pieces.length / 40) * doc.info['piece length'],
+					"size": (doc.info.pieces.length / 40) *
+						doc.info['piece length'],
 					"name": doc.info.name,
 					"files": files,
 					"num_files": num_files,
@@ -91,7 +93,8 @@ view_definitions = [
 		function(doc) {
 			if (doc.type == "torrent") {
 				doc.info_hash = doc._id;
-				doc.size = (doc.info.pieces.length / 40) * doc.info['piece length'];
+				doc.size = (doc.info.pieces.length / 40) *
+					doc.info['piece length'];
 				emit(doc.info.name, doc);
 			}
 		}

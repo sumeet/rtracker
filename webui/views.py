@@ -8,7 +8,9 @@ import hashlib
 @Memcache('torrent_overview', ttl=60*3)
 def torrents(request):
 	torrent_list = []
-	for torrent in db.database.view('torrent_info/by_pub_date', descending=True):
+	for torrent in db.database.view(
+		'torrent_info/by_pub_date', descending=True
+	):
 		track = tracker.db.Torrent(torrent.id)
 		torrent_list.append({
 			'size': torrent.value.get('size'),
@@ -27,7 +29,8 @@ def torrents(request):
 def torrent_file(request):
 	torrent = db.Torrent.get(info_hash=request.args.get('id'))
 	return Response(torrent.get_file(),
-		headers=[('Content-Disposition', 'attachment; filename=%s.torrent' % torrent.info.get('name'))],
+		headers=[('Content-Disposition', 'attachment; filename=%s.torrent' %
+			torrent.info.get('name'))],
 		mimetype='application/x-bittorrent')
 
 @JSONResponse
@@ -37,7 +40,9 @@ def torrent_info(request):
 	interval = 2400
 	information = mc.get(key)
 	if information is None:
-		information = list(db.database.view('torrent_info_detailed/by_info_hash')[info_hash])[0].value
+		information = list(db.database.view(
+			'torrent_info_detailed/by_info_hash'
+		)[info_hash])[0].value
 		mc.set(key, information, interval)
 	return information
 
@@ -49,7 +54,9 @@ class LoginRequired:
 		if request.method == 'POST':
 			username = request.form.get('username')
 			password = hashlib.md5(request.form.get('password')).hexdigest()
-			if len(db.database.view('users/by_username,password')[username, password]) == 1:
+			if len(db.database.view(
+				'users/by_username,password'
+			)[username, password]) == 1:
 				return self.func(request)
 			else:
 				return {'success': False}
@@ -60,7 +67,8 @@ class LoginRequired:
 def login(request):
 	return {
 		'success': True,
-		'categories': [row.key for row in db.database.view('categories/names', group=True)]
+		'categories': [row.key
+			for row in db.database.view('categories/names', group=True)]
 	}
 	
 @JSONResponse

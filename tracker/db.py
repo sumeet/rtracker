@@ -3,7 +3,7 @@ import utils
 from base64 import binascii
 from rtracker.common.utils import mc
 
-KEEP_KEYS = 10 * 60 # seconds to keep inactive peers in the store before expiring them
+KEEP_KEYS = 10 * 60 # expire peers after not hearing from them
 INTERVAL = 180
 
 client = redis.Redis()
@@ -36,7 +36,7 @@ class Torrent:
 		elif len(info_hash) == 20:
 			self.info_hash = binascii.hexlify(info_hash)
 		else:
-			raise TorrentUnregistered(info_hash) # if the info_hash is bad, it's unregistered. no need to be more specific
+			raise TorrentUnregistered(info_hash)
 		
 		if create:
 			self._create()
@@ -48,13 +48,21 @@ class Torrent:
 	def find_peers(self, ip=None, port=None, status=None):
 		return client.keys('%d:%s:%s' % (
 			hash(self.info_hash),
-			'*' if status is None else 's' if status.startswith('s') else 'l' if status.startswith('l') else '*',
-			'*' if (ip is None or port is None) else utils.compact(ip, port, ascii=True)
+			'*' if status is None
+				else 's' if status.startswith('s')
+				else 'l' if status.startswith('l')
+				else '*',
+			'*' if (ip is None or port is None)
+				else utils.compact(ip, port, ascii=True)
 		))
 
 	def delete_peer(self, ip, port):
-		client.delete('%d:s:%s' % (hash(self.info_hash), utils.compact(ip, port, ascii=True)))
-		client.delete('%d:l:%s' % (hash(self.info_hash), utils.compact(ip, port, ascii=True)))
+		client.delete('%d:s:%s' % (
+			hash(self.info_hash), utils.compact(ip, port, ascii=True))
+		)
+		client.delete('%d:l:%s' % (
+			hash(self.info_hash), utils.compact(ip, port, ascii=True))
+		)
 
 	def register_peer(self, ip, port, uploaded, downloaded, left):
 		key = '%d:%s:%s' % (
@@ -70,7 +78,10 @@ class Torrent:
 		key = 'get_peerlist_%s' % self.info_hash
 		peerlist = mc.get(key)
 		if peerlist is None:
-			peerlist = ''.join([binascii.unhexlify(peer.split(':')[2]) for peer in self.find_peers()])
+			peerlist = ''.join(
+				[binascii.unhexlify(peer.split(':')[2])
+					for peer in self.find_peers()]
+			)
 			mc.set(key, peerlist, INTERVAL)
 		return peerlist
 		

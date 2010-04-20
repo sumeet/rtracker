@@ -6,7 +6,8 @@ mc = MemcachedCache(['127.0.0.1:11211'], key_prefix='rtracker')
 
 class JSONResponse:
 	"""
-	Decorator for view functions that transforms the return value into a JSON response.
+	Decorator for view functions that transforms the return value into a JSON
+	response.
 	"""
 	def __init__(self, func):
 		self.func = func
@@ -16,18 +17,11 @@ class JSONResponse:
 		callback = request.args.get('callback')
 		if callback:
 			json = '%s(%s);' % (callback, json)
-		return Response(json, content_type='application/javascript; charset=utf-8')
+		return Response(
+			json,
+			content_type='application/javascript; charset=utf-8'
+		)
 
-
-#class MemcacheResponse:
-	"""
-	Decorator for view functions that caches the return value, optionally based on request arguments.
-	
-	>>> class MockRequest(): pass
-	... 
-	>>> request1 = MockRequest()
-	>>> setattr(request1, 'args', {'goob': 'town'})
-	"""
 
 class Memcache:
 	"""
