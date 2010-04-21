@@ -5,7 +5,6 @@ from bzrlib import bencode
 from werkzeug import Response
 import db
 from rtracker.common.utils import mc
-import redis
 
 INTERVAL = 1000
 
