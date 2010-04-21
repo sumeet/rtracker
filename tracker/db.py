@@ -2,11 +2,17 @@ import redis
 import utils
 from base64 import binascii
 from rtracker.common.utils import mc
+import cluster
 
 KEEP_KEYS = 10 * 60 # expire peers after not hearing from them
 INTERVAL = 180
 
-client = redis.Redis()
+client = cluster.RedisCluster([
+	redis.Redis(port=6379),
+	redis.Redis(port=6380),
+	redis.Redis(port=6381),
+	redis.Redis(port=6382),
+])
 
 class TorrentAlreadyExists(Exception):
 	def __init__(self, info_hash):
@@ -57,11 +63,13 @@ class Torrent:
 		))
 
 	def delete_peer(self, ip, port):
-		client.delete('%d:s:%s' % (
-			hash(self.info_hash), utils.compact(ip, port, ascii=True))
-		)
-		client.delete('%d:l:%s' % (
-			hash(self.info_hash), utils.compact(ip, port, ascii=True))
+		client.delete(
+			'%d:s:%s' % ( # If the peer is a seed
+				hash(self.info_hash), utils.compact(ip, port, ascii=True)
+			),
+			'%d:l:%s' % ( # If the peer is a leecher
+				hash(self.info_hash), utils.compact(ip, port, ascii=True)
+			)
 		)
 
 	def register_peer(self, ip, port, uploaded, downloaded, left):
