@@ -1,4 +1,4 @@
-from threading import Thread as Process
+from threading import Thread
 from Queue import Queue
 
 class RedisCluster(object):
@@ -14,26 +14,26 @@ class RedisCluster(object):
 
 	def keys(self, query='*'):
 		queue = Queue()
-		processes = []
+		threads = []
 
 		def _keys(_queue, _client, _query):
 			_queue.put(_client.keys(_query))
 
 		for client in self.clients:
-			processes.append(Process(
+			threads.append(Thread(
 				target=_keys,
 				args=[queue, client, query]
 			))
 
-		for process in processes:
-			process.start()
+		for thread in threads:
+			thread.start()
 			
 		results = []
-		for process in processes:
+		for thread in threads:
 			results.extend(queue.get())
 		
-		for process in processes:
-			process.join()
+		for thread in threads:
+			thread.join()
 			
 		return results
 	
