@@ -40,7 +40,7 @@ class Torrent(schema.Document):
 	encoding = schema.TextField()
 	info = schema.DictField()
 	
-	pub_date = schema.DateTimeField(default=datetime.datetime.now())
+	pub_date = schema.DateTimeField()
 	uploaded_by = schema.TextField()
 	category = schema.TextField()
 		
@@ -51,6 +51,8 @@ class Torrent(schema.Document):
 		
 	def store(self, db=database):
 		self.tracker(create=True)
+		if not self.pub_date:
+			self.pub_date = datetime.datetime.now()
 		super(Torrent, self).store(db)
 		db.put_attachment(
 			db.get(self.id),
