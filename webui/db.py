@@ -25,7 +25,7 @@ class Torrent(schema.Document):
 			elif isinstance(data, utils.TorrentFile):
 				torrent_file = data
 			elif hasattr(data, 'read'):
-				torrent_file = utils.TorrentFile(data.read(2 * 1024 * 1024))
+				torrent_file = utils.TorrentFile(data.read())
 			kwargs.update(dict([(str(key).replace(' ', '_'),val)
 				for key,val in torrent_file.dictionary.iteritems()]))
 			return super(Torrent, self).__init__(

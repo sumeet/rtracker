@@ -93,8 +93,8 @@ def upload(request):
 @JSONResponse
 @LoginRequired
 def delete(request):
-    torrent = request.files.get('torrent')
-    db.Torrent(torrent).delete()
+    torrent = request.form.get('torrent')
+    db.Torrent.get(info_hash=torrent).delete()
     mc.delete('torrent_overview')
     return {
         'success': True
