@@ -2,17 +2,16 @@ import redis
 import utils
 from base64 import binascii
 from rtracker.common.utils import mc
+from rtracker import settings
 import cluster
 
 KEEP_KEYS = 10 * 60 # expire peers after not hearing from them
 INTERVAL = 180
 
-client = cluster.RedisCluster([
-	redis.Redis(port=6379),
-	redis.Redis(port=6380),
-	redis.Redis(port=6381),
-	redis.Redis(port=6382),
-])
+if len(settings.redis_servers) > 1:
+	client = cluster.RedisCluster(settings.redis_servers)
+else:
+	client = settings.redis_servers[0]
 
 class TorrentAlreadyExists(Exception):
 	def __init__(self, info_hash):
