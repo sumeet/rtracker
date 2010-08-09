@@ -29,9 +29,12 @@ def torrents(request):
 def torrent_file(request):
 	torrent = db.Torrent.get(info_hash=request.args.get('id'))
 	return Response(torrent.get_file(),
-		headers=[('Content-Disposition', 'attachment; filename=%s.torrent' %
-			torrent.info.get('name'))],
-		mimetype='application/x-bittorrent')
+		headers=[
+			'Content-Disposition', 'attachment; filename="%s.torrent"' %
+				torrent.info.get('name')
+		],
+		mimetype='application/x-bittorrent'
+	)
 
 @JSONResponse
 def torrent_info(request):
