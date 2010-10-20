@@ -1,12 +1,12 @@
-import db
-import utils
+import urllib
 import urlparse
-
 # Backwards compatibility for Python 2.5
 if not hasattr(urlparse, 'parse_qs'):
 	import cgi as urlparse
 
-import urllib
+from rtracker import settings
+import db
+import utils
 
 # Implementing the BitTorrent Tracker Protocol from
 # http://wiki.theory.org/BitTorrent_Tracker_Protocol
@@ -25,17 +25,15 @@ FAILURE_CODES = {
 	900: 'Generic error',
 }
 
-INTERVAL = 180 # seconds
-
 def failure(code=900):
 	if code not in FAILURE_CODES:
 		code = 900
-			
+
 	data = {
 		'failure reason': FAILURE_CODES.get(code),
 		'failure code': code,
 	}
-	
+
 	return utils.bResponse(data)
 
 def announce(request):
@@ -47,7 +45,7 @@ def announce(request):
 		return failure(103)
 
 	info_hash = urlparse.parse_qs(request.query_string)['info_hash'][0]
-	
+
 	if len(info_hash) != 20:
 		info_hash = urllib.unquote(info_hash)
 
@@ -57,7 +55,7 @@ def announce(request):
 	downloaded = request.args.get('downloaded', type=int)
 	left = request.args.get('left', type=int)
 	event = request.args.get('event')
-	
+
 	try:
 		torrent = db.Torrent(info_hash)
 	except db.TorrentUnregistered:
@@ -66,43 +64,43 @@ def announce(request):
 	if event == 'stopped':
 		torrent.delete_peer(ip, port)
 		return utils.bResponse('OK')
-		
+
 	if event == 'completed':
 		torrent.register_completed()
-		
+
 	torrent.register_peer(ip, port, uploaded, downloaded, left)
 
 	data = {
-		'interval': INTERVAL,
+		'interval': settings.announce_interval,
 		'peers': torrent.get_peerlist(),
 	}
 
 	return utils.bResponse(data)
-	
+
 def scrape(request):
 	if request.method != 'GET':
 		return failure(100)
-		
+
 	if 'info_hash' in request.args:
 		info_hashes = urlparse.parse_qs(request.query_string)['info_hash']
-	
+
 		for (i, info_hash) in enumerate(info_hashes):
 			if len(info_hash) != 20:
 				info_hashes[i] = urllib.unquote(info_hash)
-		
+
 		try:
 			torrents = [db.Torrent(info_hash) for info_hash in info_hashes]
 		except db.TorrentUnregistered:
 			return failure(200)
-		
+
 	else:
 		torrents = utils.get_torrents()
-		
+
 	files = {}
-	
+
 	for torrent in torrents:
 		files.update(utils.scrapedict(torrent))
-		
+
 	data = {'files': files ,}
-	
+
 	return utils.bResponse(data)
