@@ -1,6 +1,8 @@
 import os
+
 from werkzeug.routing import Map, Rule
-from werkzeug import Request, Response, responder
+from werkzeug import Request, responder
+
 import views
 
 root_path = os.path.abspath(os.path.dirname(__file__))
@@ -9,7 +11,7 @@ url_map = Map([
 	Rule('/announce', endpoint='announce'),
 	Rule('/scrape', endpoint='scrape'),
 ])
-	
+
 views = {
 	'announce': views.announce,
 	'scrape': views.scrape,

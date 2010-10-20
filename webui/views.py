@@ -1,7 +1,7 @@
 import db
 from rtracker.common.utils import JSONResponse, Memcache, mc
 from rtracker import tracker
-from werkzeug import Response, redirect, Href
+from werkzeug import Response
 import hashlib
 
 @JSONResponse
@@ -25,7 +25,7 @@ def torrents(request):
 			'completed': track.completed(),
 		})
 	return torrent_list
-	
+
 def torrent_file(request):
 	torrent = db.Torrent.get(info_hash=request.args.get('id'))
 	return Response(torrent.get_file(),
@@ -52,7 +52,7 @@ def torrent_info(request):
 class LoginRequired:
 	def __init__(self, func):
 		self.func = func
-		
+
 	def __call__(self, request):
 		if request.method == 'POST':
 			username = request.form.get('username')
@@ -63,8 +63,8 @@ class LoginRequired:
 				return self.func(request)
 			else:
 				return {'success': False}
-		
-		
+
+
 @JSONResponse
 @LoginRequired
 def login(request):
@@ -73,22 +73,22 @@ def login(request):
 		'categories': [row.key
 			for row in db.database.view('categories/names', group=True)]
 	}
-	
+
 @JSONResponse
 @LoginRequired
 def upload(request):
 	torrent = request.files.get('torrent')
 	category = request.form.get('category')
 	username = request.form.get('username')
-	
+
 	new_torrent = db.Torrent(torrent)
 	new_torrent.category = category
 	new_torrent.uploaded_by = username
-	
+
 	new_torrent.store()
-	
+
 	mc.delete('torrent_overview')
-	
+
 	return {
 		'success': True
 	}

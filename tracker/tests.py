@@ -2,7 +2,7 @@ import unittest
 import db
 import views
 import utils
-from werkzeug import EnvironBuilder, Request, BaseResponse
+from werkzeug import EnvironBuilder, Request
 from bzrlib import bencode
 
 SAMPLE_HASH = '\x98H\x16\xfd2\x96"\x87n\x14\x90v4&No3.\x9f\xb3'
@@ -20,17 +20,17 @@ class TestTorrentDB(unittest.TestCase):
 		except db.TorrentAlreadyExists:
 			db.Torrent(SAMPLE_HASH).delete()
 			self.torrent = db.Torrent(SAMPLE_HASH, create=True)
-	
+
 	def tearDown(self):
 		self.torrent.delete()
-	
+
 	def test_add_torrent_by_hex_encoded_hash(self):
 		self.assertRaises(db.TorrentAlreadyExists,
 			db.Torrent, SAMPLE_HASH_HEX, create=True)
-		
+
 	def test_delete_torrent(self):
 		self.assert_(self.torrent.delete())
-		
+
 
 class TestViews(unittest.TestCase):
 	def _build_announce_request_object(self, ip='1.1.1.1', port='1234',
@@ -45,7 +45,7 @@ class TestViews(unittest.TestCase):
 			'left': left,
 			'event': event,
 		}
-		
+
 		return Request(EnvironBuilder(
 			method='GET',
 			query_string=query_string
@@ -53,25 +53,25 @@ class TestViews(unittest.TestCase):
 
 	def setUp(self):
 		self.torrent = db.Torrent(SAMPLE_HASH, create=True)
-	
+
 	def tearDown(self):
 		self.torrent.delete()
-		
+
 	def test_announce(self):
 		response_data = bencode.bdecode(views.announce(
 			self._build_announce_request_object(ip='1.1.1.1', port='1234')
 		).data)
-		
+
 		self.assert_(
 			utils.compact('1.1.1.1', 1234)in response_data.get('peers')
 		)
-		
+
 	def test_scrape(self):
 		views.announce(self._build_announce_request_object(ip='1.1.1.1',
 			port='1234', left='0', event='completed'))
 		views.announce(self._build_announce_request_object(ip='2.2.2.2',
 			port='1234', left='200'))
-		
+
 		# Scrape with info_hash specified
 		query_string = { 'info_hash': SAMPLE_HASH }
 		request = Request(EnvironBuilder(
@@ -87,7 +87,7 @@ class TestViews(unittest.TestCase):
 				}
 			},
 		})
-		
+
 		# Scrape with no info_hash specified
 		request = Request(EnvironBuilder(method='GET').get_environ())
 		response_data = bencode.bdecode(views.scrape(request).data)
@@ -96,7 +96,7 @@ class TestViews(unittest.TestCase):
 				'downloaded': 1,
 				'incomplete': 1,
 		})
-		
+
 	def test_failure(self):
 		# Announce with no info_hash specified
 		request = Request(EnvironBuilder(method='GET').get_environ())
@@ -106,7 +106,7 @@ class TestViews(unittest.TestCase):
 			'failure code': 101,
 		}
 		self.assertEqual(response_data, failure)
-		
+
 	def test_bad_info_hash(self):
 		"""
 		Announcing with an info_hash that's not registed should give a failure
@@ -120,7 +120,7 @@ class TestViews(unittest.TestCase):
 			'failure code': 200,
 		}
 		self.assertEqual(response_data, failure)
-		
+
 	def test_post_announce(self):
 		# Try HTTP POST to announce instead of GET
 		request = Request(EnvironBuilder(method='POST').get_environ())

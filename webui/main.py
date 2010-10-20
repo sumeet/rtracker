@@ -1,5 +1,5 @@
 from werkzeug.routing import Map, Rule
-from werkzeug import Request, Response, responder
+from werkzeug import Request, responder
 import views
 
 url_map = Map([
@@ -10,7 +10,7 @@ url_map = Map([
 	Rule('/torrent_info', endpoint='torrent_info'),
 	Rule('/delete', endpoint='delete'),
 ])
-	
+
 views = {
 	'webui': views.torrents,
 	'download': views.torrent_file,
