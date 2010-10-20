@@ -3,4 +3,4 @@
 .DS_Store
 *.so
 .python-eggs
-
+.coverage
